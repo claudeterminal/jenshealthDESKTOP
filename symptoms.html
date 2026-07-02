@@ -3,34 +3,217 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jen's Health — Symptom & Data Log</title>
+<title>Jen's Health — Symptom &amp; Data Log</title>
 <style>
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f6f8fa;color:#1a1a1a;margin:0;padding:24px;}
+  :root{
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --c-meal:#eb6834; --c-supp:#1baf7a; --c-med:#4a3aa7; --c-symptom:#e34948;
+    --c-activity:#008300; --c-sleep:#2a78d6; --c-note:#898781;
+    --sleep-bad:#d03b3b; --sleep-ok:#eda100; --sleep-good:#0ca30c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+      --c-meal:#d95926; --c-supp:#199e70; --c-med:#9085e9; --c-symptom:#e66767;
+      --c-activity:#008300; --c-sleep:#3987e5; --c-note:#898781;
+      --sleep-bad:#e66767; --sleep-ok:#c98500; --sleep-good:#0ca30c;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--page);color:var(--ink);margin:0;padding:24px;}
   h1{font-size:22px;margin:0 0 4px;}
-  .sub{color:#666;font-size:13px;margin-bottom:20px;}
-  .entry{background:#fff;border:1px solid #e3e6ea;border-radius:12px;padding:14px 16px;margin:0 0 10px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-  .time{color:#0a7d3c;font-size:12px;font-weight:600;letter-spacing:.02em;}
-  .text{font-size:16px;margin-top:4px;white-space:pre-wrap;}
-  .empty{color:#888;font-style:italic;}
+  h2{font-size:16px;margin:26px 0 10px;letter-spacing:-0.01em;}
+  .sub{color:var(--ink2);font-size:13px;margin-bottom:18px;}
+
+  /* ---- Patterns grid ---- */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 14px 6px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 12px;font-size:12.5px;color:var(--ink2);}
+  .legend .lg{display:inline-flex;align-items:center;gap:6px;}
+  .legend .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto;}
+  .hint{color:var(--muted);font-size:12px;margin:0 0 10px;}
+  .grid-wrap{overflow-x:auto;overflow-y:hidden;border:1px solid var(--grid);border-radius:10px;}
+  table.grid{border-collapse:separate;border-spacing:0;font-size:12px;table-layout:fixed;}
+  table.grid th,table.grid td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);}
+  table.grid thead th{position:sticky;top:0;z-index:3;background:var(--surface);width:48px;
+    font-weight:600;color:var(--ink2);text-align:center;padding:5px 4px;line-height:1.15;white-space:nowrap;}
+  table.grid thead th .dow{display:block;font-size:10px;color:var(--muted);font-weight:500;}
+  table.grid thead th.today{color:var(--c-sleep);}
+  .tlabel{position:sticky;left:0;z-index:2;background:var(--surface);color:var(--muted);
+    font-variant-numeric:tabular-nums;text-align:right;padding:2px 8px;white-space:nowrap;width:58px;font-size:11px;}
+  thead th.corner{position:sticky;left:0;z-index:4;background:var(--surface);width:58px;}
+  td.cell{padding:2px;vertical-align:top;height:26px;}
+  td.cell.night{background:color-mix(in srgb, var(--grid) 40%, transparent);}
+  .chips{display:flex;flex-wrap:wrap;gap:2px;}
+  .chip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;
+    font-size:11px;line-height:1;cursor:default;background:color-mix(in srgb, var(--c) 22%, transparent);
+    box-shadow:inset 0 0 0 1.3px var(--c);}
+  /* sleep strip */
+  .sleeprow td.tlabel{color:var(--c-sleep);font-weight:600;}
+  td.sleepcell{padding:3px 3px;vertical-align:middle;height:34px;background:var(--surface);}
+  .sbar{position:relative;height:22px;border-radius:5px;background:color-mix(in srgb, var(--grid) 60%, transparent);overflow:hidden;}
+  .sbar>span{position:absolute;left:0;top:0;bottom:0;background:var(--c-sleep);opacity:.55;border-radius:5px;}
+  .sbar>b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .snum-bad{color:var(--sleep-bad);} .snum-ok{color:var(--sleep-ok);} .snum-good{color:var(--sleep-good);}
+  .snone{color:var(--muted);font-size:11px;text-align:center;}
+
+  /* ---- Full log list ---- */
+  .entry{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:0 0 9px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .entry .tag{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;vertical-align:middle;}
+  .time{color:var(--ink2);font-size:12px;font-weight:600;letter-spacing:.02em;}
+  .text{font-size:15px;margin-top:4px;white-space:pre-wrap;}
+  .empty{color:var(--muted);font-style:italic;}
 </style>
 </head>
 <body>
   <h1>🩺 Jen's Health — Symptom &amp; Data Log</h1>
-  <div class="sub">Logged automatically when you text ClaudeBot. Newest first.</div>
+  <div class="sub">Logged automatically when you text ClaudeBot. Grid at top = pattern view; full log below (newest first).</div>
+
+  <div id="patterns" class="panel"><div class="empty">Loading patterns…</div></div>
+
+  <h2>Full log</h2>
   <div id="log"><div class="empty">Loading…</div></div>
+
 <script>
-fetch('./symptoms.json?_=' + Date.now())
-  .then(r => r.ok ? r.json() : [])
-  .then(data => {
-    var el = document.getElementById('log');
-    if (!data || !data.length) { el.innerHTML = '<div class="empty">No entries yet.</div>'; return; }
-    el.innerHTML = data.map(function(e){
-      return '<div class="entry"><div class="time">' +
-        (e.time||'') + '</div><div class="text">' +
-        String(e.entry||'').replace(/</g,'&lt;') + '</div></div>';
-    }).join('');
-  })
-  .catch(function(){ document.getElementById('log').innerHTML = '<div class="empty">Could not load log.</div>'; });
+var CATS = [
+  {key:'sleep',    emoji:'😴', label:'Sleep',        color:'var(--c-sleep)',    re:/slept|sleep\s*[:—\-]|hours? of sleep/i},
+  {key:'symptom',  emoji:'⚠️', label:'Symptom', color:'var(--c-symptom)', re:/naus|diarr|hive|welt|dizz|vertigo|stomach|reflux|crash|cramp|bloat|spinning|panic|vomit|throw ?up|ache|(?<!back )pain|constipat|\bgas\b|heartburn|itch|rash|swell/i},
+  {key:'med',      emoji:'💊', label:'Med (Xanax)',  color:'var(--c-med)',      re:/xanax|alprazolam|klonopin|ativan/i},
+  {key:'supp',     emoji:'🌿', label:'Supplement',   color:'var(--c-supp)',     re:/supplement|quercetin|zinc|glutamine|probiotic|vitamin|phgg|sunfiber|fiber|enzyme|magnesium|theanine|carnosine|guar gum|omega|fish oil|melatonin|collagen/i},
+  {key:'activity', emoji:'🚶', label:'Activity',     color:'var(--c-activity)', re:/walk|cardio|\bsteps\b|active cal|exercise|workout|\brun\b|stretch|yoga/i},
+  {key:'meal',     emoji:'🍽️', label:'Meal / food',  color:'var(--c-meal)',     re:/meal|\bate\b|eating|cookie|dumpling|noodle|salad|\begg|salmon|fries|potato|\brice\b|snack|broth|milk|soup|chicken|lettuce|drink|coffee|\btea\b|fruit|banana|cranberr|bread|cheese|yogurt|sip\b|dinner|lunch|breakfast/i},
+  {key:'note',     emoji:'📝', label:'Note',         color:'var(--c-note)',     re:/.*/}
+];
+var CATMAP={}; CATS.forEach(function(c){CATMAP[c.key]=c;});
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+function pad(n){return (n<10?'0':'')+n;}
+function parseEntry(e){
+  var m=/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/.exec(e.time||'');
+  if(!m) return null;
+  return {dayKey:m[1]+'-'+m[2]+'-'+m[3], h:+m[4], min:+m[5], hm:m[4]+':'+m[5], text:e.entry||''};
+}
+function categorize(text){
+  for(var i=0;i<CATS.length;i++){ if(CATS[i].re.test(text)) return CATS[i]; }
+  return CATMAP.note;
+}
+function sleepHours(text){
+  if(!CATMAP.sleep.re.test(text)) return null;
+  var m=/(\d+)\s*h(?:ours?|rs?)?\s*(?:(\d+)\s*m)?/i.exec(text);
+  if(m) return (+m[1])+(m[2]?(+m[2])/60:0);
+  var m2=/(\d+(?:\.\d+)?)\s*hours?/i.exec(text);
+  if(m2) return +m2[1];
+  return null;
+}
+function keyToDate(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function dateKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function fmtHour(h){var ap=h<12?'AM':'PM';var hh=h%12;if(hh===0)hh=12;return hh+' '+ap;}
+function fmtDay(k){var d=keyToDate(k);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDow(k){var d=keyToDate(k);return d.toLocaleDateString('en-US',{weekday:'short'});}
+
+// hours shown, waking-first, night at the bottom
+var HOURS=[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1];
+var HOURSET={}; HOURS.forEach(function(h,i){HOURSET[h]=i;});
+function rowForHour(h){ if(h in HOURSET) return h; return 1; } // 2-4am folds into the 1am row
+
+function buildPatterns(data){
+  var el=document.getElementById('patterns');
+  var parsed=[];
+  data.forEach(function(e){var p=parseEntry(e); if(p) parsed.push(p);});
+  if(!parsed.length){el.innerHTML='<div class="empty">No dated entries yet.</div>';return;}
+
+  // day range: last 30 days ending today (or latest entry), not before first entry
+  var keys=parsed.map(function(p){return p.dayKey;}).sort();
+  var firstData=keys[0], lastData=keys[keys.length-1];
+  var todayKey=dateKey(new Date());
+  var endKey=todayKey>lastData?todayKey:lastData;
+  var days=[]; var dt=keyToDate(endKey);
+  for(var i=0;i<30;i++){days.unshift(dateKey(dt));dt.setDate(dt.getDate()-1);}
+  days=days.filter(function(k){return k>=firstData;});
+
+  // buckets[dayKey][hourRow] = [events]; sleep[dayKey] = hours
+  var buckets={}, sleep={};
+  parsed.forEach(function(p){
+    var sh=sleepHours(p.text);
+    if(sh!=null){ sleep[p.dayKey]=Math.max(sleep[p.dayKey]||0, sh); return; }
+    var c=categorize(p.text);
+    var r=rowForHour(p.h);
+    (buckets[p.dayKey]=buckets[p.dayKey]||{});
+    (buckets[p.dayKey][r]=buckets[p.dayKey][r]||[]).push({c:c,p:p});
+  });
+
+  var html='<div class="legend">';
+  CATS.forEach(function(c){ if(c.key==='note') return;
+    html+='<span class="lg"><span class="sw" style="background:'+c.color+'"></span>'+c.emoji+' '+c.label+'</span>';
+  });
+  html+='</div><div class="hint">Last '+days.length+' days · hover any mark for the exact time &amp; full note. Scroll sideways for older days.</div>';
+
+  html+='<div class="grid-wrap"><table class="grid"><thead><tr><th class="corner">time</th>';
+  days.forEach(function(k){
+    var isToday=(k===todayKey);
+    html+='<th'+(isToday?' class="today"':'')+'>'+fmtDay(k)+'<span class="dow">'+fmtDow(k)+'</span></th>';
+  });
+  html+='</tr></thead><tbody>';
+
+  // sleep strip
+  html+='<tr class="sleeprow"><td class="tlabel">😴 sleep</td>';
+  days.forEach(function(k){
+    var h=sleep[k];
+    if(h==null){ html+='<td class="sleepcell"><div class="snone">·</div></td>'; return; }
+    var pct=Math.max(6,Math.min(100, h/9*100));
+    var cls=h<6?'snum-bad':(h<7?'snum-ok':'snum-good');
+    var hh=Math.floor(h), mm=Math.round((h-hh)*60);
+    var lbl=hh+'h'+(mm?pad(mm):'');
+    html+='<td class="sleepcell" title="'+esc(k)+' — slept '+lbl+'"><div class="sbar"><span style="width:'+pct+'%"></span><b class="'+cls+'">'+lbl+'</b></div></td>';
+  });
+  html+='</tr>';
+
+  // hour rows
+  HOURS.forEach(function(hr){
+    var night=(hr>=22||hr<=5);
+    html+='<tr><td class="tlabel">'+fmtHour(hr)+'</td>';
+    days.forEach(function(k){
+      var evs=(buckets[k]&&buckets[k][hr])||[];
+      html+='<td class="cell'+(night?' night':'')+'">';
+      if(evs.length){
+        html+='<div class="chips">';
+        evs.sort(function(a,b){return a.p.min-b.p.min;});
+        evs.forEach(function(ev){
+          var tip=ev.p.hm+' — '+ev.p.text;
+          html+='<span class="chip" style="--c:'+ev.c.color+'" title="'+esc(tip)+'">'+ev.c.emoji+'</span>';
+        });
+        html+='</div>';
+      }
+      html+='</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+
+  // scroll so the most recent day is visible
+  var wrap=el.querySelector('.grid-wrap');
+  if(wrap) wrap.scrollLeft=wrap.scrollWidth;
+}
+
+function buildLog(data){
+  var el=document.getElementById('log');
+  if(!data||!data.length){el.innerHTML='<div class="empty">No entries yet.</div>';return;}
+  el.innerHTML=data.map(function(e){
+    var c=sleepHours(e.entry||'')!=null?CATMAP.sleep:categorize(e.entry||'');
+    return '<div class="entry"><div class="time"><span class="tag" style="background:'+c.color+'"></span>'+
+      esc(e.time||'')+'</div><div class="text">'+esc(e.entry||'')+'</div></div>';
+  }).join('');
+}
+
+fetch('./symptoms.json?_='+Date.now())
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(data){ buildPatterns(data); buildLog(data); })
+  .catch(function(){
+    document.getElementById('patterns').innerHTML='<div class="empty">Could not load patterns.</div>';
+    document.getElementById('log').innerHTML='<div class="empty">Could not load log.</div>';
+  });
 </script>
 </body>
 </html>
