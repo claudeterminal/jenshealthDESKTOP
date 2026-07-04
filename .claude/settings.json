@@ -5,9 +5,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/dj/Documents/GitHub/jenshealth && if [ -n \"$(git status --porcelain)\" ]; then git add -A && git commit -q -m \"Auto-deploy: $(date '+%Y-%m-%d %H:%M:%S')\" && git push -q; fi 2>/dev/null; true",
+            "command": "cd /Users/dj/Documents/GitHub/jenshealth && if [ -n \"$(git status --porcelain)\" ]; then git add -A && git commit -q -m \"Auto-save: $(date '+%Y-%m-%d %H:%M:%S')\"; fi 2>/dev/null; true",
             "timeout": 120,
-            "statusMessage": "Pushing changes to GitHub..."
+            "statusMessage": "Saving changes locally (deploys hourly)..."
           }
         ]
       }
