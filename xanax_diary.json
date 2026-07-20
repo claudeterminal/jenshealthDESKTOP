@@ -1,5 +1,10 @@
 [
   {
+    "time": "2026-07-20 02:32 PM",
+    "dose": "0.27 mg",
+    "note": "Total is 0.27 mg now (running total for the day)"
+  },
+  {
     "time": "2026-07-20 02:27 PM",
     "dose": "0.04 mg",
     "note": "Took another 0.04 mg"
