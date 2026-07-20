@@ -11,8 +11,8 @@
   },
   {
     "time": "2026-07-19 03:14 PM",
-    "dose": "0.15 mg",
-    "note": "0.15 mg total today"
+    "dose": "",
+    "note": "(running-total note, not a new dose) reported 0.15 mg total so far today"
   },
   {
     "time": "2026-07-19 02:53 PM",
