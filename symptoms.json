@@ -1,5 +1,9 @@
 [
   {
+    "time": "2026-07-28 22:55",
+    "entry": "Salivary cortisol 4-point (OpenEvidence readout): 1:21 AM 0.261 \u00b5g/dL = ~3x upper limit of nighttime range (<0.010-0.090) \u2014 ONLY out-of-range value; 8:36 AM 0.449 (normal, 0.025-0.600); 5:22 PM 0.056 (normal); 2:00 AM 0.052 (normal). Jen notes she had just woken up at the 1:21 AM sample \u2014 suspects the nighttime cortisol spike is what wakes her, and that fixing it could fix her sleep."
+  },
+  {
     "time": "2026-07-28 22:29",
     "entry": "Saliva cortisol 4-point (OpenEvidence review): 1:21 AM 0.261 \u00b5g/dL \u2014 ~3x above nighttime upper limit (<0.010\u20130.090), the only abnormal value. 8:36 AM 0.449 (ref 0.025\u20130.600) normal; 5:22 PM 0.056 (0.010\u20130.200) normal; 2:00 AM 0.052 (<0.010\u20130.090) normal. Elevated cortisol at expected midnight\u20132 AM nadir; fits HPA/cortisol-rhythm disruption and night waking."
   },
