@@ -109,7 +109,7 @@ function sleepHours(text){
 function keyToDate(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
 function dateKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function fmtHour(h){var ap=h<12?'AM':'PM';var hh=h%12;if(hh===0)hh=12;return hh+' '+ap;}
-function fmtDay(k){var d=keyToDate(k);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDay(k){var d=keyToDate(k);return (d.getMonth()+1)+'/'+d.getDate();}
 function fmtDow(k){var d=keyToDate(k);return d.toLocaleDateString('en-US',{weekday:'short'});}
 
 // hours shown, waking-first, night at the bottom
